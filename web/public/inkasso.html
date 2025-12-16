@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inkasso Verwaltung</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --accent: #0ea5e9;
+      --accent-2: #22c55e;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: #1f2937;
+      --danger: #f43f5e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.08), transparent 28%),
+        radial-gradient(circle at 80% 0%, rgba(34, 197, 94, 0.07), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.65));
+      backdrop-filter: blur(10px);
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.6rem;
+      letter-spacing: 0.02em;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(14, 165, 233, 0.4);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(17, 24, 39, 0.7));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+    }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    label {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: #0b1220;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 1rem;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.98rem;
+      transition: transform 0.08s ease, box-shadow 0.15s ease;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #38bdf8);
+      color: #0b1220;
+      box-shadow: 0 10px 30px rgba(14, 165, 233, 0.25);
+    }
+
+    .btn-ghost {
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .status {
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.92rem;
+    }
+
+    .status-open { background: rgba(244, 63, 94, 0.15); color: #fecdd3; border: 1px solid rgba(244, 63, 94, 0.4); }
+    .status-progress { background: rgba(14, 165, 233, 0.15); color: #bae6fd; border: 1px solid rgba(14, 165, 233, 0.4); }
+    .status-closed { background: rgba(34, 197, 94, 0.15); color: #bbf7d0; border: 1px solid rgba(34, 197, 94, 0.4); }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: rgba(11, 18, 32, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 4px 8px;
+      border-radius: 8px;
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .flex {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .totals {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .total-box {
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border);
+      display: grid;
+      gap: 6px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: rgba(148, 163, 184, 0.15);
+      font-weight: 600;
+      color: var(--text);
+      display: inline-block;
+    }
+
+    .small-btn {
+      padding: 8px 10px;
+      font-size: 0.92rem;
+    }
+
+    .warning { color: #fca5a5; }
+
+    .empty {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Inkasso Verwaltung</h1>
+      <p class="muted" style="margin: 6px 0 0;">Leichte Übersicht über Schuldner, Forderungen und Zahlungen.</p>
+    </div>
+    <span class="badge">Demo - Lokal gespeichert</span>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Neue Forderung anlegen</h2>
+      <div class="grid-two">
+        <div>
+          <label for="debtor">Schuldnername</label>
+          <input id="debtor" placeholder="Max Mustermann" />
+        </div>
+        <div>
+          <label for="debtorEmail">E-Mail</label>
+          <input id="debtorEmail" type="email" placeholder="max@firma.de" />
+        </div>
+        <div>
+          <label for="debtorPhone">Telefon</label>
+          <input id="debtorPhone" placeholder="0157 123456" />
+        </div>
+        <div>
+          <label for="amount">Betrag (€)</label>
+          <input id="amount" type="number" min="0" step="0.01" placeholder="1200" />
+        </div>
+        <div>
+          <label for="dueDate">Fällig am</label>
+          <input id="dueDate" type="date" />
+        </div>
+        <div>
+          <label for="status">Status</label>
+          <select id="status">
+            <option value="offen">Offen</option>
+            <option value="in-bearbeitung">In Bearbeitung</option>
+            <option value="abgeschlossen">Abgeschlossen</option>
+          </select>
+        </div>
+        <div style="grid-column: span 2;">
+          <label for="notes">Notizen</label>
+          <textarea id="notes" rows="2" placeholder="Aktenzeichen, Vereinbarungen, nächste Schritte"></textarea>
+        </div>
+      </div>
+      <div style="margin-top: 12px; display: flex; gap: 10px;">
+        <button class="btn-primary" id="addCase">Forderung speichern</button>
+        <button class="btn-ghost" id="clearForm">Felder leeren</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="meta">
+        <h2>Übersicht</h2>
+        <div class="actions">
+          <input id="search" placeholder="Suche nach Name, E-Mail oder Aktenzeichen" style="width: 240px;" />
+          <select id="filterStatus" style="width: 180px;">
+            <option value="">Status filtern</option>
+            <option value="offen">Offen</option>
+            <option value="in-bearbeitung">In Bearbeitung</option>
+            <option value="abgeschlossen">Abgeschlossen</option>
+          </select>
+          <button class="btn-ghost" id="exportCases">Export JSON</button>
+          <button class="btn-ghost" id="resetCases">Demo neu laden</button>
+        </div>
+      </div>
+
+      <div class="totals" id="summary"></div>
+
+      <div class="card-grid" id="caseList"></div>
+      <div id="emptyState" class="empty" style="display: none;">Noch keine Einträge gefunden.</div>
+    </section>
+  </main>
+
+  <template id="caseTemplate">
+    <article class="card">
+      <div class="meta">
+        <div class="flex">
+          <h3 class="case-title"></h3>
+          <span class="chip case-id"></span>
+        </div>
+        <span class="status"></span>
+      </div>
+      <div class="flex">
+        <span class="pill amount"></span>
+        <span class="pill outstanding"></span>
+        <span class="pill due"></span>
+      </div>
+      <p class="muted contact"></p>
+      <p class="muted notes"></p>
+      <div class="flex" style="justify-content: space-between; align-items: flex-end; gap: 8px;">
+        <div class="muted payments"></div>
+        <div class="actions">
+          <select class="status-select small-btn"></select>
+          <button class="btn-ghost small-btn add-payment">Zahlung erfassen</button>
+          <button class="btn-ghost small-btn delete-case">Löschen</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    const caseList = document.getElementById('caseList');
+    const summary = document.getElementById('summary');
+    const emptyState = document.getElementById('emptyState');
+
+    const inputs = {
+      debtor: document.getElementById('debtor'),
+      debtorEmail: document.getElementById('debtorEmail'),
+      debtorPhone: document.getElementById('debtorPhone'),
+      amount: document.getElementById('amount'),
+      dueDate: document.getElementById('dueDate'),
+      status: document.getElementById('status'),
+      notes: document.getElementById('notes'),
+    };
+
+    const storageKey = 'inkasso-cases-v1';
+
+    function loadCases() {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) return JSON.parse(stored);
+      const today = new Date();
+      return [
+        {
+          id: 'AZ-2024-1001',
+          debtor: 'Max Mustermann',
+          debtorEmail: 'max@example.com',
+          debtorPhone: '0157 123456',
+          amount: 1250,
+          dueDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7).toISOString().slice(0, 10),
+          status: 'offen',
+          notes: 'Erste Mahnung versendet.',
+          payments: [
+            { date: new Date().toISOString().slice(0, 10), amount: 200 },
+          ],
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: 'AZ-2024-1002',
+          debtor: 'LogiTrans GmbH',
+          debtorEmail: 'buchhaltung@logitrans.de',
+          debtorPhone: '040 123456',
+          amount: 7800,
+          dueDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 3).toISOString().slice(0, 10),
+          status: 'in-bearbeitung',
+          notes: 'Telefonat geführt, Ratenzahlung angeboten.',
+          payments: [],
+          createdAt: new Date().toISOString(),
+        },
+      ];
+    }
+
+    let cases = loadCases();
+
+    function saveCases() {
+      localStorage.setItem(storageKey, JSON.stringify(cases));
+    }
+
+    function euro(amount) {
+      return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
+    }
+
+    function clearForm() {
+      Object.values(inputs).forEach((input) => (input.value = ''));
+      inputs.status.value = 'offen';
+    }
+
+    function addCase() {
+      const amount = parseFloat(inputs.amount.value);
+      if (!inputs.debtor.value || Number.isNaN(amount) || amount <= 0) {
+        alert('Name und Betrag werden benötigt.');
+        return;
+      }
+      const newCase = {
+        id: `AZ-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000 + 1000)}`,
+        debtor: inputs.debtor.value.trim(),
+        debtorEmail: inputs.debtorEmail.value.trim(),
+        debtorPhone: inputs.debtorPhone.value.trim(),
+        amount,
+        dueDate: inputs.dueDate.value,
+        status: inputs.status.value,
+        notes: inputs.notes.value.trim(),
+        payments: [],
+        createdAt: new Date().toISOString(),
+      };
+      cases.unshift(newCase);
+      saveCases();
+      render();
+      clearForm();
+    }
+
+    function updateStatus(id, status) {
+      cases = cases.map((entry) => (entry.id === id ? { ...entry, status } : entry));
+      saveCases();
+      render();
+    }
+
+    function addPayment(id) {
+      const amountString = prompt('Zahlungsbetrag in € (z.B. 150.00):');
+      if (!amountString) return;
+      const amount = parseFloat(amountString.replace(',', '.'));
+      if (Number.isNaN(amount) || amount <= 0) {
+        alert('Ungültiger Betrag.');
+        return;
+      }
+      const date = prompt('Datum (JJJJ-MM-TT), leer lassen für heute:');
+      const paymentDate = date ? new Date(date) : new Date();
+      if (Number.isNaN(paymentDate.getTime())) {
+        alert('Ungültiges Datum.');
+        return;
+      }
+      cases = cases.map((entry) =>
+        entry.id === id
+          ? { ...entry, payments: [...entry.payments, { date: paymentDate.toISOString().slice(0, 10), amount }] }
+          : entry
+      );
+      saveCases();
+      render();
+    }
+
+    function deleteCase(id) {
+      if (!confirm('Eintrag wirklich löschen?')) return;
+      cases = cases.filter((entry) => entry.id !== id);
+      saveCases();
+      render();
+    }
+
+    function calcOutstanding(entry) {
+      const paid = entry.payments.reduce((sum, p) => sum + p.amount, 0);
+      return { paid, outstanding: Math.max(entry.amount - paid, 0) };
+    }
+
+    function renderSummary(filtered) {
+      const totalAmount = filtered.reduce((sum, c) => sum + c.amount, 0);
+      const totalPaid = filtered.reduce((sum, c) => sum + calcOutstanding(c).paid, 0);
+      const totalOutstanding = filtered.reduce((sum, c) => sum + calcOutstanding(c).outstanding, 0);
+      const overdue = filtered.filter((c) => c.dueDate && new Date(c.dueDate) < new Date() && calcOutstanding(c).outstanding > 0);
+
+      summary.innerHTML = `
+        <div class="total-box">
+          <span class="muted">Gesamtbetrag</span>
+          <strong>${euro(totalAmount)}</strong>
+        </div>
+        <div class="total-box">
+          <span class="muted">Bereits bezahlt</span>
+          <strong style="color: var(--accent-2);">${euro(totalPaid)}</strong>
+        </div>
+        <div class="total-box">
+          <span class="muted">Offen</span>
+          <strong style="color: ${totalOutstanding ? '#f8d06a' : '#22c55e'};">${euro(totalOutstanding)}</strong>
+        </div>
+        <div class="total-box">
+          <span class="muted">Überfällig</span>
+          <strong class="${overdue.length ? 'warning' : ''}">${overdue.length} Fälle</strong>
+        </div>`;
+    }
+
+    function renderCases(filtered) {
+      caseList.innerHTML = '';
+      emptyState.style.display = filtered.length ? 'none' : 'block';
+
+      filtered.forEach((entry) => {
+        const tpl = document.getElementById('caseTemplate').content.cloneNode(true);
+        const { paid, outstanding } = calcOutstanding(entry);
+
+        tpl.querySelector('.case-title').textContent = entry.debtor;
+        tpl.querySelector('.case-id').textContent = entry.id;
+        tpl.querySelector('.amount').textContent = `Forderung: ${euro(entry.amount)}`;
+        tpl.querySelector('.outstanding').textContent = `Offen: ${euro(outstanding)}`;
+        tpl.querySelector('.due').textContent = entry.dueDate ? `Fällig: ${entry.dueDate}` : 'Kein Fälligkeitsdatum';
+        tpl.querySelector('.contact').textContent = `${entry.debtorEmail || 'keine E-Mail'} · ${entry.debtorPhone || 'kein Telefon'}`;
+        tpl.querySelector('.notes').textContent = entry.notes || 'Keine Notizen';
+        tpl.querySelector('.payments').textContent = entry.payments.length
+          ? `Zahlungen: ${entry.payments.map((p) => `${p.date} (${euro(p.amount)})`).join(', ')}`
+          : 'Zahlungen: keine';
+
+        const statusBadge = tpl.querySelector('.status');
+        const statusSelect = tpl.querySelector('.status-select');
+        const statusMap = {
+          offen: { label: 'Offen', cls: 'status-open', icon: '⚠️' },
+          'in-bearbeitung': { label: 'In Bearbeitung', cls: 'status-progress', icon: '🔄' },
+          abgeschlossen: { label: 'Abgeschlossen', cls: 'status-closed', icon: '✅' },
+        };
+        const currentStatus = statusMap[entry.status] || statusMap.offen;
+        statusBadge.textContent = `${currentStatus.icon} ${currentStatus.label}`;
+        statusBadge.className = `status ${currentStatus.cls}`;
+
+        Object.entries(statusMap).forEach(([value, data]) => {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = data.label;
+          if (entry.status === value) option.selected = true;
+          statusSelect.appendChild(option);
+        });
+
+        statusSelect.addEventListener('change', (e) => updateStatus(entry.id, e.target.value));
+        tpl.querySelector('.add-payment').addEventListener('click', () => addPayment(entry.id));
+        tpl.querySelector('.delete-case').addEventListener('click', () => deleteCase(entry.id));
+
+        caseList.appendChild(tpl);
+      });
+    }
+
+    function applyFilters() {
+      const term = document.getElementById('search').value.toLowerCase();
+      const statusFilter = document.getElementById('filterStatus').value;
+
+      const filtered = cases.filter((entry) => {
+        const matchesTerm = term
+          ? [entry.debtor, entry.debtorEmail, entry.id].some((value) =>
+              String(value || '').toLowerCase().includes(term)
+            )
+          : true;
+        const matchesStatus = statusFilter ? entry.status === statusFilter : true;
+        return matchesTerm && matchesStatus;
+      });
+
+      renderSummary(filtered);
+      renderCases(filtered);
+    }
+
+    function exportCases() {
+      const blob = new Blob([JSON.stringify(cases, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'inkasso-daten.json';
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetCases() {
+      if (!confirm('Demo-Daten wirklich neu laden? Dies überschreibt lokale Anpassungen.')) return;
+      cases = loadCases();
+      saveCases();
+      render();
+    }
+
+    document.getElementById('addCase').addEventListener('click', addCase);
+    document.getElementById('clearForm').addEventListener('click', clearForm);
+    document.getElementById('search').addEventListener('input', applyFilters);
+    document.getElementById('filterStatus').addEventListener('change', applyFilters);
+    document.getElementById('exportCases').addEventListener('click', exportCases);
+    document.getElementById('resetCases').addEventListener('click', resetCases);
+
+    function render() {
+      applyFilters();
+    }
+
+    render();
+  </script>
+</body>
+</html>
